@@ -36,6 +36,8 @@ foreign key(cut) references cuts(id),
 foreign key(color) references colors(id),
 foreign key(clarity) references clarities(id)
 );")
+dbSendQuery(conn=db,"create index carat_idx ON diamondlistings (carat);")
+
 #check how the tables are doing
 dbListTables(conn=db)
 #as all seems in place, we need to populate the lookup tables
@@ -48,7 +50,8 @@ clarities<- levels(diamonds$clarity)
 diamonds %>% mutate(cut=as.character(cut), color=as.character(color), clarity=as.character(clarity))%>% 
         merge(.,dbReadTable(db,"cuts"),by="cut") %>% select(-id) %>%
         merge(.,dbReadTable(db,"colors"),by="color") %>% select(-id) %>%
-        merge(.,dbReadTable(db,"clarities"),by="clarity") %>% select(-id) %>%
+        merge(.,dbReadTable(db,"clarities"),by="clarity") %>% select(-id) %>% 
+        select(carat, cut, color, clarity, depth, table, price, x, y, z) %>%
         dbWriteTable(conn = db, "diamondlistings", value =., append=TRUE, row.names=TRUE)
 #car read with dbReadTable(db, "diamondlistings") to make sure it's all there
-        
+dbDisconnect(db)
