@@ -27,7 +27,7 @@ cut integer,
 color integer,
 clarity integer,
 depth real not null,
-tbl real not null,
+`table` real not null,
 price real not null,
 x real not null,
 y real not null,
@@ -40,6 +40,9 @@ dbSendQuery(conn=db,"create index carat_idx ON diamondlistings (carat);")
 dbSendQuery(conn=db,"create index depth_idx ON diamondlistings (depth);")
 dbSendQuery(conn=db,"create index table_idx ON diamondlistings (`table`);")
 dbSendQuery(conn=db,"create index price_idx ON diamondlistings (price);")
+dbSendQuery(conn=db,"create index cut_idx ON diamondlistings (cut);")
+dbSendQuery(conn=db,"create index color_idx ON diamondlistings (color);")
+dbSendQuery(conn=db,"create index clarity ON diamondlistings (clarity);")
 #check how the tables are doing
 dbListTables(conn=db)
 #as all seems in place, we need to populate the lookup tables
@@ -50,10 +53,10 @@ colors<- levels(diamonds$color)
 clarities<- levels(diamonds$clarity)
 #now we prepare and fill in the diamond data
 diamonds %>% mutate(cut=as.character(cut), color=as.character(color), clarity=as.character(clarity))%>% 
-        merge(.,dbReadTable(db,"cuts"),by="cut") %>% select(-id) %>%
-        merge(.,dbReadTable(db,"colors"),by="color") %>% select(-id) %>%
-        merge(.,dbReadTable(db,"clarities"),by="clarity") %>% select(-id) %>% 
-        select(carat, cut, color, clarity, depth, table, price, x, y, z) %>%
+        merge(.,dbReadTable(db,"cuts"),by="cut") %>% mutate(cut=id) %>% select(-id) %>%
+        merge(.,dbReadTable(db,"colors"),by="color") %>% mutate(color=id)%>% select(-id) %>%
+        merge(.,dbReadTable(db,"clarities"),by="clarity") %>% mutate(clarity=id) %>% select(-id) %>% 
+        select(carat, cut, color, clarity, depth, table, price, x, y, z) %>% 
         dbWriteTable(conn = db, "diamondlistings", value =., append=TRUE, row.names=TRUE)
 #car read with dbReadTable(db, "diamondlistings") to make sure it's all there
 dbDisconnect(db)
