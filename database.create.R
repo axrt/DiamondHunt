@@ -37,7 +37,9 @@ foreign key(color) references colors(id),
 foreign key(clarity) references clarities(id)
 );")
 dbSendQuery(conn=db,"create index carat_idx ON diamondlistings (carat);")
-
+dbSendQuery(conn=db,"create index depth_idx ON diamondlistings (depth);")
+dbSendQuery(conn=db,"create index table_idx ON diamondlistings (`table`);")
+dbSendQuery(conn=db,"create index price_idx ON diamondlistings (price);")
 #check how the tables are doing
 dbListTables(conn=db)
 #as all seems in place, we need to populate the lookup tables
