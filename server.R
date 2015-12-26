@@ -6,7 +6,7 @@ library("dplyr")
 db<- dbConnect(SQLite(), dbname="diamonds")
 
 #server function
-shinyServer(function(input, output, session) {
+shinyServer(function(input, output, session ) {#not entirely sure I do the session right..
         #this function will be used from reactive context below.
         #it simply joins the main diamondlistings table with the
         #lookup tables and slices to the given parameters, such
@@ -52,7 +52,9 @@ shinyServer(function(input, output, session) {
         }
         
         
-        plo<- reactive( {
+        observe( {#do not use reactive here! it has a bug leading to null ids on the points added to the
+                #plot later on
+                
                 #find the one that is currently selected for the axis
                 #and get the variable name by varibale
                 xvar.label <- names(axis.labels)[axis.labels == input$xlab]
@@ -82,10 +84,9 @@ shinyServer(function(input, output, session) {
                         }, "hover")%>%#scale the plot to fill the space dedicated
                         set_options(width = 800, height = 500) %>%
                         add_axis("x", title = xvar.label, title_offset = 60) %>% #push the axis names back a little
-                        add_axis("y", title = yvar.label, title_offset = 60)
+                        add_axis("y", title = yvar.label, title_offset = 60) %>%
+                        bind_shiny(plot_id = "diamond_plot") #bind to an id
         })
-        
-        plo %>% bind_shiny(plot_id = "diamond_plot") #bind to an id
         
         return(output)
 })
