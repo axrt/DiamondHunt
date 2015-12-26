@@ -35,14 +35,16 @@ shinyUI(fluidPage(
                                            max = depth.min.max[2], value = depth.min.max, step = 0.01),
                                sliderInput("table", label = h3("Table (%)"), min = table.min.max[1], 
                                            max = table.min.max[2], value = table.min.max, step = 0.01)
-                       ),
-                       wellPanel(
-                               selectInput("xlab", "X values", axis.labels, selected = "price"),
-                               selectInput("ylab", "Y values", axis.labels, selected = "carat")
                        )
+                      
                 ),
                 column(width=7,
-                       ggvisOutput(plot_id = "diamond_plot")
+                       ggvisOutput(plot_id = "diamond_plot"),
+                       wellPanel(
+                               selectInput("xlab", "X values", axis.labels, selected = "carat"),
+                               selectInput("ylab", "Y values", axis.labels, selected = "price"),
+                               selectInput("fill", "Fill", axis.labels, selected = "color")
+                       )
                 )
         )
 ))
