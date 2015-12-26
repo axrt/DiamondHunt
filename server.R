@@ -2,11 +2,18 @@ library("shiny")
 library("ggvis")
 library("dplyr")
 
+#connect to the embedded diamond database
 db<- dbConnect(SQLite(), dbname="diamonds")
 
+#server function
 shinyServer(function(input, output, session) {
+        #this function will be used from reactive context below.
+        #it simply joins the main diamondlistings table with the
+        #lookup tables and slices to the given parameters, such
+        #as price, weight etc.
         diamonds.list<- function() {
                 #get the paramters fromt he input
+                #(had some misterious troubles had i not assign to new varibales)
                 carat<- input$carat
                 cut<- input$cut
                 color<- input$color
@@ -14,7 +21,7 @@ shinyServer(function(input, output, session) {
                 depth<- input$depth
                 table<- input$table
                 price<- input$price
-                
+                #the database query itself
                 diamonds.data<- dbGetQuery(db, paste0("select diamondlistings.id,
                                          carat, cuts.cut, colors.color, 
                                          clarities.clarity, depth, `table`, price
@@ -41,22 +48,29 @@ shinyServer(function(input, output, session) {
                                                       " and depth>=", depth[1],
                                                       " and depth<=", depth[2],
                                                       ";"))
-                return(diamonds.data)
+                return(diamonds.data)#returns the dataframe of diamonds for a given set of parameters
         }
         
+        
         plo<- reactive( {
-                
+                #find the one that is currently selected for the axis
+                #and get the variable name by varibale
                 xvar.label <- names(axis.labels)[axis.labels == input$xlab]
                 yvar.label <- names(axis.labels)[axis.labels == input$ylab]
+                #as we are going to use these in a formula, convert to variable object
                 xvar <- prop("x", as.symbol(input$xlab))
                 yvar <- prop("y", as.symbol(input$ylab))
                 fill.color <- prop("fill", as.symbol(input$fill))
+                
+                #get the diamond listings set with the given parameters
                 dl<- diamonds.list()
+                #plot out
                 dl %>%
-                        ggvis(x=xvar, y=yvar) %>%
-                        layer_points(fill=fill.color, size := ~carat*100, stroke :="grey", strokeWidth := 0.2, size.hover := ~carat*500,
-                                     fillOpacity := 0.2, fillOpacity.hover := 0.7, key := ~id) %>%
-                        add_tooltip(function(x){
+                        ggvis(x=xvar, y=yvar) %>% #initiate plot
+                        layer_points(fill=fill.color, size := ~carat*100, 
+                                     stroke :="grey", strokeWidth := 0.2, size.hover := ~carat*500,
+                                     fillOpacity := 0.2, fillOpacity.hover := 0.7, key := ~id) %>% #overlay with points
+                        add_tooltip(function(x){ #add a tooltip (the thing that appears on hover over a dot)
                                 x<- filter(dl, id==x$id)
                                 paste(
                                         "Carat: ", x$carat, "</br>",
@@ -64,15 +78,14 @@ shinyServer(function(input, output, session) {
                                         "Color: ", x$color, "</br>",
                                         "Clarity: ", x$clarity, "</br>",
                                         "Price: ", x$price, "</br>"
-                                      )
-                        }, "hover")%>%
-                        set_options(width = 800, height = 520) %>%
-                        add_axis("x", title = xvar.label) %>%
-                        add_axis("y", title = yvar.label)
-                        
+                                      )#print out the 4C parameters and price
+                        }, "hover")%>%#scale the plot to fill the space dedicated
+                        set_options(width = 800, height = 500) %>%
+                        add_axis("x", title = xvar.label, title_offset = 60) %>% #push the axis names back a little
+                        add_axis("y", title = yvar.label, title_offset = 60)
         })
         
-        plo %>% bind_shiny(plot_id = "diamond_plot")
+        plo %>% bind_shiny(plot_id = "diamond_plot") #bind to an id
         
         return(output)
 })
