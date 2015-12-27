@@ -1,8 +1,8 @@
 name: DaimondHunt
 account: axrt
 server: shinyapps.io
-bundleId: 339106
+bundleId: 339155
 url: https://axrt.shinyapps.io/DaimondHunt
-when: 1451174174.73856
+when: 1451184697.24753
 asMultiple: FALSE
 asStatic: FALSE
