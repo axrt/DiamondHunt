@@ -31,6 +31,8 @@ shinyUI(fluidPage(
         ),
         #title
         titlePanel("Know your diamonds!"),
+        #load in the help file
+        includeHTML("howto.html"), 
         #a row that contains the whole UI
         fluidRow(
                 #the leftmost column that contains all the controls
